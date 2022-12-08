@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" stderr="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" stopOnFailure="false" bootstrap="vendor/autoload.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage includeUncoveredFiles="true" processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">./src/DataTester/Client</directory>
+      <directory suffix=".php">./src/DataTester/Distributor</directory>
+      <directory suffix=".php">./src/DataTester/Entities</directory>
+      <directory prefix="EventBuilder">./src/DataTester/Event</directory>
+      <directory suffix=".php">./src/DataTester/Utils</directory>
+    </include>
+    <report>
+      <html outputDirectory="./test-result/report" lowUpperBound="35" highLowerBound="70"/>
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="Datatester PHP SDK Tests">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+  <logging/>
+</phpunit>

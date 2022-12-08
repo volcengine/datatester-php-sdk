@@ -1,0 +1,7 @@
+/.idea
+/vendor/
+index.php
+/log
+.DS_Store
+/test-result
+.phpunit.result.cache

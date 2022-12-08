@@ -1,0 +1,23 @@
+{
+    "name": "datatester/datatester-php-sdk",
+    "description": "Datatester SDK for PHP",
+    "keywords": ["Datatester", "php", "sdk"],
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "DataTester\\": "src/DataTester"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "ext-json": "*"
+    },
+    "require": {
+        "php": ">=7.1",
+        "monolog/monolog": "^1.25",
+        "guzzlehttp/guzzle": "~6.2",
+        "composer/semver": "^3.2",
+        "lastguest/murmurhash": "^2.0",
+        "ext-json": "*"
+    }
+}
