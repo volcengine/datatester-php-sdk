@@ -27,6 +27,11 @@ class HTTPProductConfigManager implements ProductConfigManagerInterface
     private $_httpClient;
 
     /**
+     * @var array
+     */
+    private $_meta;
+
+    /**
      * @var String url
      */
     private $_url;
@@ -102,17 +107,22 @@ class HTTPProductConfigManager implements ProductConfigManagerInterface
             $this->_logger->log(Logger::ERROR, 'datatester Meta error, status code:' . $status);
             throw new MetaServerException('datatester meta server error');
         }
-        $_meta = json_decode($response->getBody()->getContents(), true);
-        $lastModifyTime = $_meta['modify_time'] ?? 0;
+        $this->_meta = json_decode($response->getBody()->getContents(), true);
+        $lastModifyTime = $this->_meta['modify_time'] ?? 0;
         if ($lastModifyTime > $this->_lastModifyTime) {
             $this->_logger->log(Logger::DEBUG, 'metaJson was modified');
-            $this->_productConfig = new ProductConfig($_meta, $this->_logger);
+            $this->_productConfig = new ProductConfig($this->_meta, $this->_logger);
         }
-        return $_meta;
+        return $this->_meta;
     }
 
     public function getConfig(): ?ProductConfig
     {
         return $this->_productConfig;
+    }
+
+    public function getMeta(): ?array
+    {
+        return $this->_meta;
     }
 }
