@@ -51,7 +51,8 @@ class DecisionService
         Experiment $experiment,
         $decisionId,
         $attributes,
-        array &$experiment2variant
+        array &$experiment2variant,
+        bool $needCache = true
     ): ?Variant
     {
         $decisionId = (string) $decisionId;
@@ -69,7 +70,7 @@ class DecisionService
                     $attributes = [];
                 }
                 $associateExperiment = $projectConfig->getExperimentById($associateExperimentId);
-                $variant = $this->getVariation($projectConfig, $associateExperiment, $decisionId, $attributes, $experiment2variant);
+                $variant = $this->getVariation($projectConfig, $associateExperiment, $decisionId, $attributes, $experiment2variant, false);
                 if ($variant != null) {
                     $attributes[CommonConst::EXPERIMENT_PREFIX. $associateExperimentId] = true;
                     continue;
@@ -81,7 +82,9 @@ class DecisionService
         // allow list
         $variant = $this->handleAllowList($experiment, $decisionId, $attributes);
         if (isset($variant)) {
-            $experiment2variant[$experiment->getId()] = $variant->getId();
+            if ($needCache) {
+                $experiment2variant[$experiment->getId()] = $variant->getId();
+            }
             return $variant;
         }
 
@@ -128,7 +131,7 @@ class DecisionService
         }
 
         // experiment hash -> variant
-        $variantId=null;
+        $variantId = null;
         $bucketExperimentKey = BucketKeyBuilder::generateKey($decisionId, $experiment->getName());
         $variantId = $this->_bucketService->bucket($release->getTrafficAllocation(), $bucketExperimentKey);
         $variant = isset($variantId) ? $experiment->getVariantById($variantId) : null;
@@ -136,20 +139,27 @@ class DecisionService
         // handle father experiments
         $fatherExperimentId = $experiment->getFatherExperimentId();
         if (!isset($fatherExperimentId, $variant) || $fatherExperimentId === "") {
-            $experiment2variant[$experiment->getId()] = $variant->getId();
+            if ($needCache) {
+                $experiment2variant[$experiment->getId()] = $variant->getId();
+            }
             return $variant;
         }
         $fatherVariantIds = $variant->getFatherVariants();
         if (!isset($fatherVariantIds)) {
-            $experiment2variant[$experiment->getId()] = $variant->getId();
+            if ($needCache) {
+                $experiment2variant[$experiment->getId()] = $variant->getId();
+            }
             return $variant;
         }
         $fatherExperiment = $projectConfig->getExperimentById($fatherExperimentId);
-        $fatherVariant = $this->getVariation($projectConfig, $fatherExperiment, $decisionId, $attributes, $experiment2variant);
+        $fatherVariant = $this->getVariation($projectConfig, $fatherExperiment, $decisionId, $attributes, $experiment2variant, false);
         if (!isset($fatherVariant)) {
             return null;
         }
         if (in_array($fatherVariant->getId(), $fatherVariantIds, true)) {
+            if ($needCache) {
+                $experiment2variant[$experiment->getId()] = $variant->getId();
+            }
             return $variant;
         }
         return null;

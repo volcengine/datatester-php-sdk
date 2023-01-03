@@ -260,6 +260,38 @@ class AbClient
         return $configs;
     }
 
+    private function getAllExperimentConfigs4Activate($variantKey, $decisionId, $attributes): ?array
+    {
+        $experiment2variant = $this->initUserAbInfo($decisionId);
+        $experiment2variantCopy = $experiment2variant;
+        $config = $this->getProductConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(ErrorConsts::INVALID_CONFIG, __FUNCTION__));
+            return [];
+        }
+        $experiments = $config->getExperiments();
+        $configs = [];
+        $vid2ExperimentId = [];
+        foreach ($experiments as $experiment) {
+            $variant = $this->getExperimentVariant($experiment->getId(), $decisionId, $attributes, $experiment2variantCopy);
+            $config = isset($variant) ? $variant->toConfig() : null;
+            if (isset($config)){
+                $configs += $config;
+                $vid2ExperimentId[$variant->getId()] = $experiment->getId();
+            }
+        }
+        if (array_key_exists($variantKey, $configs)) {
+            $value = $configs[$variantKey];
+            $vid = $value['vid'];
+            $experimentId = $vid2ExperimentId[$vid] ?? null;
+            if (isset($experimentId)) {
+                $experiment2variant[$experimentId] = $vid;
+            }
+        }
+        $this->updateUserAbInfo($decisionId, $experiment2variant);
+        return $configs;
+    }
+
     /**
      * @param $featureId
      * @param $decisionId
@@ -393,7 +425,7 @@ class AbClient
      */
     public function activate($variantKey, $decisionId, $trackId, $attributes, $defaultValue)
     {
-        $configs = $this->getAllExperimentConfigs($decisionId, $attributes);
+        $configs = $this->getAllExperimentConfigs4Activate($variantKey, $decisionId, $attributes);
         $configs += $this->getAllFeatureConfigs($decisionId, $attributes);
         if (array_key_exists($variantKey, $configs)) {
             $value = $configs[$variantKey];
@@ -413,7 +445,7 @@ class AbClient
      */
     public function activateWithoutImpression($variantKey, $decisionId, $attributes): array
     {
-        $configs = $this->getAllExperimentConfigs($decisionId, $attributes);
+        $configs = $this->getAllExperimentConfigs4Activate($variantKey, $decisionId, $attributes);
         $configs += $this->getAllFeatureConfigs($decisionId, $attributes);
         if (array_key_exists($variantKey, $configs)) {
             return $configs[$variantKey];
@@ -453,7 +485,11 @@ class AbClient
         if (!$this->_userAbInfoHandler->needPersistData()) {
             return;
         }
-        $experiments = $this->getProductConfig()->getExperiments();
+        $config = $this->getProductConfig();
+        if ($config === null) {
+            return;
+        }
+        $experiments = $config->getExperiments();
         $userAbInfo = [];
         foreach ($experiments as $experiment) {
             $variantId = $experiment2variant[$experiment->getId()] ?? null;
