@@ -46,7 +46,7 @@ class EventBuilder
 
     public function createExposureEvent($abVersions, $trackId, $attributes): array
     {
-        if ($this->_supportAnonymousEvent && $trackId == "") {
+        if ($this->_supportAnonymousEvent && $trackId == "" && $attributes != null) {
             return $this->createAnonymousExposureEvent($abVersions, $trackId, $attributes);
         }
         $localTime = time() * 1000;
@@ -89,7 +89,7 @@ class EventBuilder
         ];
         $deviceId = $this->getIdByType(IdType::DEVICE_ID, $attributes);
         // SaaS device_id、bddid、web_id can be set
-        // onpremise set device_id according to priority(device_id>bddid>web_id)
+        // onpremise set device_id according to priority(device_id>bddid,web_id)
         if ($this->_isSaas) {
             if ($deviceId != -1) {
                 $event["user"][IdType::DEVICE_ID] = $deviceId;
@@ -97,10 +97,6 @@ class EventBuilder
             $bdDid = $this->getBdDid($attributes);
             if ($bdDid != "") {
                 $event["user"][IdType::BDDID] = $bdDid;
-            }
-            $webId = $this->getIdByType(IdType::WEB_ID, $attributes);
-            if ($webId != -1) {
-                $event["user"][IdType::WEB_ID] = $webId;
             }
         } else {
             if ($deviceId != -1) {
@@ -111,10 +107,10 @@ class EventBuilder
                     $event["user"][IdType::DEVICE_ID] = (int)$bdDid;
                 }
             }
-            $webId = $this->getIdByType(IdType::WEB_ID, $attributes);
-            if ($webId != -1) {
-                $event["user"][IdType::WEB_ID] = $webId;
-            }
+        }
+        $webId = $this->getIdByType(IdType::WEB_ID, $attributes);
+        if ($webId != -1) {
+            $event["user"][IdType::WEB_ID] = $webId;
         }
         return $event;
     }

@@ -72,7 +72,7 @@ class UserAbInfoTest extends TestCase
     {
         $this->_userAbInfoHandler->clearCache();
         $attributes = [];
-        $configArr = $this->_abClient->getAllExperimentConfigs("decisionId", $attributes);
+        $this->_abClient->getAllExperimentConfigs("decisionId", $attributes);
         self::assertTrue(sizeof(json_decode($this->_userAbInfoHandler->query("decisionId"), true)) == 5);
         $this->_userAbInfoHandler->clearCache();
         $this->_abClient->activate("asso","decisionId", "trackId", $attributes, null);

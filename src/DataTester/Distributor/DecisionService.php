@@ -10,6 +10,7 @@ namespace DataTester\Distributor;
 use DataTester\Consts\CommonConst;
 use DataTester\Consts\ExperimentMode;
 use DataTester\Consts\ExperimentStatus;
+use DataTester\Consts\FeatureStatus;
 use DataTester\Consts\SideType;
 use DataTester\Logger\LoggerInterface;
 use DataTester\Meta\ProductConfig;
@@ -230,7 +231,7 @@ class DecisionService
             ));
             return $variant;
         }
-        if ($feature->getStatus() !== 1) {
+        if ($feature->getStatus() !== FeatureStatus::ENABLE) {
             return null;
         }
 
