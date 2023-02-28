@@ -435,7 +435,7 @@ class RedisConfigManager implements ProductConfigManagerInterface
         if ($valueFromRedis == null) {
             $productConfigManger = new HTTPProductConfigManager($this->_token);
             try {
-                $metaInfo = $productConfigManger->fetchMeta();
+                $metaInfo = $productConfigManger->getMeta();
                 $this->setValue2Redis("tester_meta_info", JsonParse::transferArray2JsonStr($metaInfo), 60);
                 $this->_productConfig = new ProductConfig($metaInfo, $this->_logger);
                 return $this->_productConfig;
@@ -517,7 +517,7 @@ class RedisHandler implements UserAbInfoHandler
 ```
 
 ### Anonymously tracking
->If there is no user_unique_id as trackId, you can use device_id, web_id, bddid for anonymous tracking.
+>If there is no user_unique_id as trackId, you can use device_id, web_id, bddid（only onpremise） for anonymous tracking.
 1. set event builder config
 ```
 enable anonymously tracking
@@ -915,7 +915,7 @@ class RedisConfigManager implements ProductConfigManagerInterface
         if ($valueFromRedis == null) {
             $productConfigManger = new HTTPProductConfigManager($this->_token);
             try {
-                $metaInfo = $productConfigManger->fetchMeta();
+                $metaInfo = $productConfigManger->getMeta();
                 $this->setValue2Redis("tester_meta_info", JsonParse::transferArray2JsonStr($metaInfo), 60);
                 $this->_productConfig = new ProductConfig($metaInfo, $this->_logger);
                 return $this->_productConfig;
@@ -997,7 +997,7 @@ class RedisHandler implements UserAbInfoHandler
 ```
 
 ### 匿名上报
->获取不到user_unique_id的场景下, 可以使用device_id, web_id, bddid进行匿名上报
+>获取不到uuid的用户，可以通过填充device_id或者web_id进行事件上报（私有化场景下也支持bddid）
 1. 实例化AbClient后修改事件上报相关配置，setEventBuilderConfig第一个参数（true/开启，false/关闭）匿名上报，第二个参数（true/saas，false/私有化）
 ```
 enable anonymously tracking
