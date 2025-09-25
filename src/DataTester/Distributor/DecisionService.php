@@ -137,6 +137,10 @@ class DecisionService
         $variantId = $this->_bucketService->bucket($release->getTrafficAllocation(), $bucketExperimentKey);
         $variant = isset($variantId) ? $experiment->getVariantById($variantId) : null;
 
+        if (!isset($variant)) {
+            return null;
+        }
+
         // handle father experiments
         $fatherExperimentId = $experiment->getFatherExperimentId();
         if (!isset($fatherExperimentId, $variant) || $fatherExperimentId === "") {
