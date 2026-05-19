@@ -7,7 +7,6 @@
 
 namespace DataTester\Utils;
 
-use Composer\Semver\Comparator;
 use DataTester\Consts\CommonConst;
 use DataTester\Consts\FilterValueTypeConst;
 use DataTester\Consts\Method;
@@ -16,6 +15,8 @@ use DataTester\Entities\Condition;
 
 class FilterMatchUtils
 {
+    private const COMPOSER_SEMVER_COMPARATOR = 'Composer\\Semver\\Comparator';
+
     public static function match(Condition $condition, $attributes): bool
     {
         $configValue = $condition->getValue();
@@ -67,7 +68,7 @@ class FilterMatchUtils
             $result = strcmp($realValue, $configValue);
             return $result >= 0;
         } elseif ($method === Method::VERSION) {
-            return Comparator::greaterThanOrEqualTo($realValue, $configValue);
+            return FilterMatchUtils::compareVersion($realValue, $configValue, OP::GTE);
         }
         return false;
     }
@@ -81,7 +82,7 @@ class FilterMatchUtils
             $result = strcmp($realValue, $configValue);
             return $result > 0;
         } elseif ($method === Method::VERSION) {
-            return Comparator::greaterThan($realValue, $configValue);
+            return FilterMatchUtils::compareVersion($realValue, $configValue, OP::GT);
         }
         return false;
     }
@@ -95,7 +96,7 @@ class FilterMatchUtils
             $result = strcmp($realValue, $configValue);
             return $result <= 0;
         } elseif($method === Method::VERSION) {
-            return Comparator::lessThanOrEqualTo($realValue, $configValue);
+            return FilterMatchUtils::compareVersion($realValue, $configValue, OP::LTE);
         }
         return false;
     }
@@ -109,9 +110,33 @@ class FilterMatchUtils
             $result = strcmp($realValue, $configValue);
             return $result < 0;
         } elseif ($method === Method::VERSION) {
-            return Comparator::lessThan($realValue, $configValue);
+            return FilterMatchUtils::compareVersion($realValue, $configValue, OP::LT);
         }
         return false;
+    }
+
+    private static function compareVersion($realValue, $configValue, $op): bool
+    {
+        try {
+            $comparator = self::COMPOSER_SEMVER_COMPARATOR;
+            if (class_exists($comparator)) {
+                switch ($op)
+                {
+                    case OP::GTE:
+                        return $comparator::greaterThanOrEqualTo($realValue, $configValue);
+                    case OP::GT:
+                        return $comparator::greaterThan($realValue, $configValue);
+                    case OP::LTE:
+                        return $comparator::lessThanOrEqualTo($realValue, $configValue);
+                    case OP::LT:
+                        return $comparator::lessThan($realValue, $configValue);
+                }
+            }
+        } catch (\Throwable $e) {
+            return version_compare($realValue, $configValue, $op);
+        }
+
+        return version_compare($realValue, $configValue, $op);
     }
 
     private static function in($type, $realValue, $configValue): bool
