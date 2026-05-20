@@ -384,6 +384,10 @@ The detailed information about a feature's variant that a user joins. 'None' whe
 ]
 ```
 
+## Security and privacy
+This project takes security seriously.
+For vulnerability reporting and supported versions, see [SECURITY.md](SECURITY.md)
+
 ## Others
 In order to better use the sdk, some suggestions are provided.
 
